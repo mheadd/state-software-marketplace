@@ -1,0 +1,66 @@
+/* Custom styles for State Software Marketplace */
+
+body {
+    background-color: #f8fafc;
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+.navbar {
+    background: linear-gradient(90deg, #2b5876 0%, #4e4376 100%);
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.05);
+}
+
+.navbar-brand, .navbar-nav .nav-link {
+    color: #fff !important;
+    font-weight: 500;
+}
+
+.navbar-brand {
+    letter-spacing: 1px;
+    font-size: 1.5rem;
+}
+
+.footer {
+    background: #2b5876;
+    color: #fff;
+    padding: 1rem 0;
+    margin-top: 2rem;
+}
+
+.hero {
+    background: linear-gradient(90deg, #4e4376 0%, #2b5876 100%);
+    color: #fff;
+    padding: 3rem 2rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 24px rgba(44, 62, 80, 0.08);
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: #4e4376;
+    border-color: #4e4376;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #2b5876;
+    border-color: #2b5876;
+}
+
+.table {
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.04);
+    overflow: hidden;
+}
+
+.table th {
+    background: #f0f4f8;
+    color: #4e4376;
+    font-weight: 600;
+}
+
+.table td {
+    vertical-align: middle;
+}

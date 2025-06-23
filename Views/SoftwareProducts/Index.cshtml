@@ -1,0 +1,40 @@
+@model IEnumerable<state_software_marketplace.Models.SoftwareProduct>
+
+@{
+    ViewData["Title"] = "Software Products";
+}
+
+<h1 class="mb-4">Software Products</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary mb-3">Add New Product</a>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Vendor</th>
+                <th>Category</th>
+                <th style="width: 120px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td class="fw-semibold">@product.Name</td>
+                <td>@product.Description</td>
+                <td>@product.Vendor</td>
+                <td>@product.Category</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-warning me-1">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

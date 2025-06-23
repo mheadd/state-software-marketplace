@@ -1,0 +1,3 @@
+<!-- Use this file to provide workspace-specific custom instructions to Copilot. For more details, visit https://code.visualstudio.com/docs/copilot/copilot-customization#_use-a-githubcopilotinstructionsmd-file -->
+
+This is a .NET Core MVC CRUD web application for a software product directory. Use Entity Framework Core for data access, SQL Server as the backend, and follow best practices for code organization. The app is containerized with Docker and uses docker-compose for orchestration. General users can search the directory; admin users can add, edit, or delete entries (no authentication for now). UI should be simple and clean.

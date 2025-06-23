@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123;TrustServerCertificate=True
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=SoftwareDirectory
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Your_password123
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  migrate:
+    build:
+      context: .
+      target: build
+    command: ["/bin/sh", "-c", "export PATH=\"$PATH:/root/.dotnet/tools\" && dotnet ef database update"]
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123;TrustServerCertificate=True
+    depends_on:
+      - db

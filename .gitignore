@@ -1,0 +1,44 @@
+# .gitignore for ASP.NET Core, EF Core, and Docker
+
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# EF Core tools
+Migrations/*Designer.cs
+Migrations/*Snapshot.cs
+
+# Secrets
+appsettings.Development.json
+
+# Docker
+*.pid
+docker-compose.override.yml
+
+# Publish results
+/app/publish/
+
+# Other
+wwwroot/lib/
+
+# Ignore database artifacts
+*.db
+*.mdf
+*.ldf
+
