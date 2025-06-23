@@ -1,5 +1,7 @@
 # State Software Marketplace
 
+![Screenshot of State Software Marketplace](screenshot.png)
+
 This is a basic CRUD web application built with ASP.NET Core MVC and Entity Framework Core, using a containerized PostgreSQL backend. The app is containerized with Docker and orchestrated with docker-compose.
 
 ## Features
