@@ -23,12 +23,11 @@ This is a basic CRUD web application built with ASP.NET Core MVC and Entity Fram
 
 Absent compelling reasons for a custom built .NET application, agencies would probably be well served by using something like Drupal or WordPress, or something similar. These tools are open source, well documented, widely used, and battle tested.
 
-
 ## Getting Started
 
 ### Prerequisites
 - [.NET 9 SDK](https://dotnet.microsoft.com/download)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) or [Colima](https://github.com/abiosoft/colima)
 
 ### Running the App (Recommended: Docker Compose)
 1. Build and start the containers (app, db, and migration):
