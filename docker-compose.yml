@@ -5,11 +5,14 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - db
+      migrate:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123;TrustServerCertificate=True
+      - DB_CONNECTION_STRING=Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123;TrustServerCertificate=True
   db:
     image: postgres:16
     environment:
@@ -27,9 +30,11 @@ services:
     build:
       context: .
       target: build
-    command: ["/bin/sh", "-c", "export PATH=\"$PATH:/root/.dotnet/tools\" && dotnet ef database update"]
+    working_dir: /src
+    entrypoint: ["/bin/sh", "-c", "export PATH=\"$PATH:/root/.dotnet/tools\" && dotnet tool install --global dotnet-ef && dotnet ef database update --no-build --project /src/state-software-marketplace.csproj --startup-project /src/state-software-marketplace.csproj"]
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123;TrustServerCertificate=True
+      - DB_CONNECTION_STRING=Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123;TrustServerCertificate=True
     depends_on:
-      - db
+      db:
+        condition: service_healthy

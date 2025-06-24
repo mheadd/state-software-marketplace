@@ -95,6 +95,32 @@ If you are unable to access the app after running `docker-compose up --build`, t
 
 If you continue to have issues, check your Docker Desktop installation and ensure no other services are using port 8080 or 5432.
 
+## Configuration: Database Credentials
+
+The application will use the `DB_CONNECTION_STRING` environment variable for the database connection if it is set. If not, it will fall back to the default connection string in `appsettings.json`.
+
+### Setting the Database Connection String
+
+**With Docker Compose (recommended):**
+
+The `docker-compose.yml` file sets the `DB_CONNECTION_STRING` for the app and migration containers:
+
+```yaml
+    environment:
+      - DB_CONNECTION_STRING=Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123;TrustServerCertificate=True
+```
+
+**Manually (local development):**
+
+You can override the connection string by setting the environment variable before running the app:
+
+```bash
+export DB_CONNECTION_STRING="Host=localhost;Database=SoftwareDirectory;Username=postgres;Password=Your_password123"
+dotnet run
+```
+
+If `DB_CONNECTION_STRING` is not set, the app will use the default from `appsettings.json`.
+
 ## Project Structure
 - `Models/` - Entity models
 - `Data/` - Database context

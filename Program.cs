@@ -6,15 +6,22 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // Add EF Core and SQL Server
+var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+if (string.IsNullOrEmpty(connectionString))
+{
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+}
 builder.Services.AddDbContext<state_software_marketplace.Data.ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 var app = builder.Build();
 
-// Seed the database
+// Apply migrations and then seed the database
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<state_software_marketplace.Data.ApplicationDbContext>();
+    context.Database.Migrate(); // Ensure migrations are applied
     state_software_marketplace.Data.SeedData.Initialize(services);
 }
 

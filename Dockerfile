@@ -4,9 +4,9 @@ EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-COPY ["state-software-marketplace.csproj", "."]
-RUN dotnet restore "./state-software-marketplace.csproj"
+# Copy everything (including Migrations/) for build context
 COPY . .
+RUN dotnet restore "state-software-marketplace.csproj"
 RUN dotnet build "state-software-marketplace.csproj" -c Release -o /app/build
 # Install dotnet-ef tool for migrations
 RUN dotnet tool install --global dotnet-ef && \
