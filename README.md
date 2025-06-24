@@ -6,6 +6,10 @@
 
 This is a basic CRUD web application built with ASP.NET Core MVC and Entity Framework Core, using a containerized PostgreSQL backend. The app is containerized with Docker and orchestrated with docker-compose.
 
+<kbd>
+  <img src="screenshot.png">
+</kbd>
+
 ## Features
 - General users can search a directory of approved software products.
 - Admin users can add, modify, or delete entries (no authentication for now).
@@ -19,10 +23,6 @@ This is a basic CRUD web application built with ASP.NET Core MVC and Entity Fram
 
 Absent compelling reasons for a custom built .NET application, agencies would probably be well served by using something like Drupal or WordPress, or something similar. These tools are open source, well documented, widely used, and battle tested.
 
-<!-- Added border to the screenshot image using HTML for styling -->
-<p align="center">
-  <img src="screenshot.png" alt="Screenshot of State Software Marketplace" style="border: 2px solid #0078D7; border-radius: 8px; max-width: 100%;">
-</p>
 
 ## Getting Started
 
