@@ -16,8 +16,8 @@ This is a basic CRUD web application built with ASP.NET Core MVC and Entity Fram
 - Clean, simple UI for easy customization.
 
 ## To Do
-- Need to add authentication for admin users to add added or update new entries
-- Need robust search to make it easy for agencies to find authorized software tools
+- Need to add [authentication for admin users](https://github.com/mheadd/state-software-marketplace/issues/5) to add added or update new entries
+- [Need robust search](https://github.com/mheadd/state-software-marketplace/issues/6) to make it easy for agencies to find authorized software tools
 
 ## Alternate approach
 
@@ -64,120 +64,73 @@ Absent compelling reasons for a custom built .NET application, agencies would pr
    - Once all services are running, visit http://localhost:8080
    - You should see the software products directory
 
-### Troubleshooting
-- If you see database connection errors:
-  - Ensure the database container is healthy (`docker-compose ps`)
-  - Check logs with `docker-compose logs db`
-  - The database might need a moment to initialize
-- If migrations fail:
-  - Check the migrate service logs: `docker-compose logs migrate`
-  - You can see more detailed logs by running migrations manually:
-    ```bash
-    docker-compose run --rm migrate
-    ```
-   - Launch the web application
-
-2. Wait for all services to start:
-   - The database needs a few seconds to initialize
-   - The migration service will run first
-   - The web app will start after migrations complete
-
-3. Access the app at [http://localhost:8080](http://localhost:8080)
+## Troubleshooting
 
 ### Common Startup Issues
 
-If you see the error: "Unable to create a 'DbContext' of type 'RuntimeType'..." during startup:
+If you encounter issues during startup, follow these steps:
 
-1. Stop all containers:
+1. **Check Container Status**
    ```bash
+   docker ps
+   ```
+   Ensure that both `app` and `db` containers are running.
+
+2. **Database Connection Issues**
+   If you see database connection errors:
+   - Verify the connection string:
+     ```
+     Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123;TrustServerCertificate=True
+     ```
+   - Ensure database container is healthy:
+     ```bash
+     docker-compose ps
+     docker-compose logs db
+     ```
+   - The database might need a moment to initialize
+
+3. **Migration Issues**
+   If migrations aren't applying correctly:
+   - Check migration logs:
+     ```bash
+     docker-compose logs migrate
+     ```
+   - Run migrations manually:
+     ```bash
+     docker-compose run --rm migrate
+     ```
+
+4. **DbContext Errors**
+   If you see "Unable to create a 'DbContext' of type 'RuntimeType'...":
+   ```bash
+   # Stop everything and start fresh
    docker-compose down -v
-   ```
-
-2. Rebuild and start with verbose output:
-   ```bash
-   docker-compose up --build --log-level DEBUG
-   ```
-
-3. If the error persists, try running migrations separately:
-   ```bash
-   # First, ensure the database is ready
+   
+   # Start database first
    docker-compose up db -d
    
-   # Then run migrations
+   # Run migrations separately
    docker-compose run --rm migrate
    
    # Finally, start the app
    docker-compose up app
    ```
 
-### Running Database Migrations
-If you need to re-run migrations (e.g., after updating models):
+### Checking Logs
+For detailed troubleshooting, check service logs:
 ```bash
-docker-compose run --rm migrate
+# Application logs
+docker logs state-software-marketplace-app-1 --tail 50
+
+# Database logs
+docker logs state-software-marketplace-db-1 --tail 50
+
+# Migration service logs
+docker logs state-software-marketplace-migrate-1 --tail 50
 ```
 
-### Stopping the App
-To stop and remove containers, networks, and volumes:
-```bash
-docker-compose down -v
-```
-
-## Troubleshooting
-
-### Database Connection Issues
-If you see database connection errors or missing tables:
-
-1. **Check Container Status**
-   ```bash
-   docker ps
-   ```
-   Ensure that the `app` and `db` containers are both running.
-
-2. **Verify Database Connection**
-   The app uses this connection string format:
-   ```
-   Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123;TrustServerCertificate=True
-   ```
-   Make sure:
-   - The database container name matches the host ('db')
-   - The credentials match those in docker-compose.yml
-   - The database name is correct
-
-3. **Check Application Logs**
-   ```bash
-   docker logs state-software-marketplace-app-1 --tail 50
-   ```
-
-4. **Check Database Logs**
-   ```bash
-   docker logs state-software-marketplace-db-1 --tail 50
-   ```
-
-5. **Check Migration Service Logs**
-   ```bash
-   docker logs state-software-marketplace-migrate-1 --tail 50
-   ```
-
-### Fixing Database Schema Issues
-If tables are missing or migrations haven't been applied:
-
-1. **Remove existing containers and volumes**
-   ```bash
-   docker-compose down -v
-   ```
-
-2. **Start fresh with verbose logging**
-   ```bash
-   docker-compose up --build --log-level DEBUG
-   ```
-
-3. **Run migrations manually if needed**
-   ```bash
-   docker-compose run --rm migrate
-   ```
-
-If issues persist, you can:
-- Check the application's logs for specific error messages
-- Verify that the database is accepting connections
-- Ensure no other services are using the required ports
-- Review the Entity Framework Core migrations in the Migrations folder
+### Quick Reference
+- **Start fresh**: `docker-compose down -v && docker-compose up --build`
+- **Re-run migrations**: `docker-compose run --rm migrate`
+- **Stop everything**: `docker-compose down -v`
+- **Debug mode**: `docker-compose up --build --log-level DEBUG`
