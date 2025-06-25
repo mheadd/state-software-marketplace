@@ -29,15 +29,88 @@ Absent compelling reasons for a custom built .NET application, agencies would pr
 - [.NET 9 SDK](https://dotnet.microsoft.com/download)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) or [Colima](https://github.com/abiosoft/colima)
 
+### Initial Setup
+1. Clone the repository and navigate to the project directory.
+
+2. Ensure Docker is running and no services are using ports 8080 or 5432.
+
+3. Clean up any existing containers (if needed):
+   ```bash
+   docker-compose down -v
+   ```
+
 ### Running the App (Recommended: Docker Compose)
-1. Build and start the containers (app, db, and migration):
+1. Ensure all containers and volumes are cleaned up:
+   ```bash
+   docker-compose down -v
+   ```
+
+2. Build and start the containers:
    ```bash
    docker-compose up --build
    ```
-   - This will build the app, start a PostgreSQL database, run EF Core migrations, and launch the web app.
-2. Access the app at [http://localhost:8080](http://localhost:8080)
+   This will:
+   - Build the .NET application
+   - Start a PostgreSQL database
+   - Run EF Core migrations
+   - Start the web application
 
-### Running Database Migrations (Optional)
+3. Wait for all services to start:
+   - The database needs a few seconds to initialize
+   - The migration service will run and set up the database schema
+   - The web application will start last
+
+4. Access the application:
+   - Once all services are running, visit http://localhost:8080
+   - You should see the software products directory
+
+### Troubleshooting
+- If you see database connection errors:
+  - Ensure the database container is healthy (`docker-compose ps`)
+  - Check logs with `docker-compose logs db`
+  - The database might need a moment to initialize
+- If migrations fail:
+  - Check the migrate service logs: `docker-compose logs migrate`
+  - You can see more detailed logs by running migrations manually:
+    ```bash
+    docker-compose run --rm migrate
+    ```
+   - Launch the web application
+
+2. Wait for all services to start:
+   - The database needs a few seconds to initialize
+   - The migration service will run first
+   - The web app will start after migrations complete
+
+3. Access the app at [http://localhost:8080](http://localhost:8080)
+
+### Common Startup Issues
+
+If you see the error: "Unable to create a 'DbContext' of type 'RuntimeType'..." during startup:
+
+1. Stop all containers:
+   ```bash
+   docker-compose down -v
+   ```
+
+2. Rebuild and start with verbose output:
+   ```bash
+   docker-compose up --build --log-level DEBUG
+   ```
+
+3. If the error persists, try running migrations separately:
+   ```bash
+   # First, ensure the database is ready
+   docker-compose up db -d
+   
+   # Then run migrations
+   docker-compose run --rm migrate
+   
+   # Finally, start the app
+   docker-compose up app
+   ```
+
+### Running Database Migrations
 If you need to re-run migrations (e.g., after updating models):
 ```bash
 docker-compose run --rm migrate
@@ -51,7 +124,8 @@ docker-compose down -v
 
 ## Troubleshooting
 
-If you are unable to access the app after running `docker-compose up --build`, try the following steps:
+### Database Connection Issues
+If you see database connection errors or missing tables:
 
 1. **Check Container Status**
    ```bash
@@ -59,77 +133,51 @@ If you are unable to access the app after running `docker-compose up --build`, t
    ```
    Ensure that the `app` and `db` containers are both running.
 
-2. **Check Application Logs**
+2. **Verify Database Connection**
+   The app uses this connection string format:
+   ```
+   Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123;TrustServerCertificate=True
+   ```
+   Make sure:
+   - The database container name matches the host ('db')
+   - The credentials match those in docker-compose.yml
+   - The database name is correct
+
+3. **Check Application Logs**
    ```bash
    docker logs state-software-marketplace-app-1 --tail 50
    ```
-   Look for errors related to database connectivity or startup issues.
 
-3. **Check Database Logs**
+4. **Check Database Logs**
    ```bash
    docker logs state-software-marketplace-db-1 --tail 50
    ```
-   Ensure the database is healthy and ready to accept connections.
 
-4. **Run Database Migrations**
-   If the app fails to start due to missing tables or migrations, run:
+5. **Check Migration Service Logs**
+   ```bash
+   docker logs state-software-marketplace-migrate-1 --tail 50
+   ```
+
+### Fixing Database Schema Issues
+If tables are missing or migrations haven't been applied:
+
+1. **Remove existing containers and volumes**
+   ```bash
+   docker-compose down -v
+   ```
+
+2. **Start fresh with verbose logging**
+   ```bash
+   docker-compose up --build --log-level DEBUG
+   ```
+
+3. **Run migrations manually if needed**
    ```bash
    docker-compose run --rm migrate
    ```
-   This will apply any pending EF Core migrations to the database.
 
-5. **Restart the App Container**
-   After running migrations, restart the app container:
-   ```bash
-   docker restart state-software-marketplace-app-1
-   ```
-
-6. **Verify Endpoints**
-   Test the main endpoints to ensure the app is running:
-   ```bash
-   curl -I http://localhost:8080/
-   curl -I http://localhost:8080/SoftwareProducts
-   curl -I http://localhost:8080/Home/Privacy
-   ```
-   All should return `HTTP/1.1 200 OK` if the app is healthy.
-
-If you continue to have issues, check your Docker Desktop installation and ensure no other services are using port 8080 or 5432.
-
-## Configuration: Database Credentials
-
-The application will use the `DB_CONNECTION_STRING` environment variable for the database connection if it is set. If not, it will fall back to the default connection string in `appsettings.json`.
-
-### Setting the Database Connection String
-
-**With Docker Compose (recommended):**
-
-The `docker-compose.yml` file sets the `DB_CONNECTION_STRING` for the app and migration containers:
-
-```yaml
-    environment:
-      - DB_CONNECTION_STRING=Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123;TrustServerCertificate=True
-```
-
-**Manually (local development):**
-
-You can override the connection string by setting the environment variable before running the app:
-
-```bash
-export DB_CONNECTION_STRING="Host=localhost;Database=SoftwareDirectory;Username=postgres;Password=Your_password123"
-dotnet run
-```
-
-If `DB_CONNECTION_STRING` is not set, the app will use the default from `appsettings.json`.
-
-## Project Structure
-- `Models/` - Entity models
-- `Data/` - Database context
-- `Controllers/` - MVC controllers
-- `Views/` - Razor views
-
-## Customization
-- Update the UI and add authentication as needed.
-
----
-
-For more details, see the comments in the code and the Copilot instructions in `.github/copilot-instructions.md`.
+If issues persist, you can:
+- Check the application's logs for specific error messages
+- Verify that the database is accepting connections
+- Ensure no other services are using the required ports
+- Review the Entity Framework Core migrations in the Migrations folder

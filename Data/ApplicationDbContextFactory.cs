@@ -10,27 +10,53 @@ namespace state_software_marketplace.Data
     {
         public ApplicationDbContext CreateDbContext(string[] args)
         {
-            // Log current directory
-            Console.WriteLine($"[Factory] Current Directory: {Directory.GetCurrentDirectory()}");
-            // Build config to read connection string
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true)
-                .AddEnvironmentVariables()
-                .Build();
+            // Log current directory and environment for debugging
+            var currentDirectory = Directory.GetCurrentDirectory();
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+            
+            Console.WriteLine($"[Factory] Current Directory: {currentDirectory}");
+            Console.WriteLine($"[Factory] Environment: {environment}");
 
-            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-            var connectionString = configuration.GetConnectionString("DefaultConnection") 
-                ?? configuration["DB_CONNECTION_STRING"];
+            // Build configuration, looking in multiple locations
+            var configBuilder = new ConfigurationBuilder()
+                .SetBasePath(currentDirectory)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{environment}.json", optional: true)
+                .AddEnvironmentVariables();
 
-            Console.WriteLine($"[Factory] Connection String: {connectionString}");
-
-            if (string.IsNullOrEmpty(connectionString))
+            if (args != null && args.Length > 0)
             {
-                throw new InvalidOperationException("No connection string found for ApplicationDbContext.");
+                configBuilder.AddCommandLine(args);
             }
 
+            var configuration = configBuilder.Build();
+
+            // First try environment variable
+            var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+
+            // Then try configuration if not found in environment
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                connectionString = configuration.GetConnectionString("DefaultConnection");
+            }
+
+            Console.WriteLine($"[Factory] Connection String Found: {!string.IsNullOrEmpty(connectionString)}");
+            
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                var error = "No connection string found. Ensure either DB_CONNECTION_STRING environment variable or DefaultConnection in appsettings.json is set.";
+                Console.WriteLine($"[Factory] Error: {error}");
+                throw new InvalidOperationException(error);
+            }
+
+            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
             optionsBuilder.UseNpgsql(connectionString);
+
+            if (environment.Equals("Development", StringComparison.OrdinalIgnoreCase))
+            {
+                optionsBuilder.EnableSensitiveDataLogging();
+                optionsBuilder.EnableDetailedErrors();
+            }
 
             return new ApplicationDbContext(optionsBuilder.Options);
         }

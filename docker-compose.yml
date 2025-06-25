@@ -12,7 +12,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - DB_CONNECTION_STRING=Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123;TrustServerCertificate=True
+      - DB_CONNECTION_STRING=Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123
   db:
     image: postgres:16
     environment:
@@ -30,11 +30,26 @@ services:
     build:
       context: .
       target: build
+    volumes:
+      - .:/src
     working_dir: /src
-    entrypoint: ["/bin/sh", "-c", "export PATH=\"$PATH:/root/.dotnet/tools\" && dotnet tool install --global dotnet-ef && dotnet ef database update --no-build --project /src/state-software-marketplace.csproj --startup-project /src/state-software-marketplace.csproj"]
+    entrypoint: ["/bin/sh", "-c", "
+      export PATH=\"$PATH:/root/.dotnet/tools\" &&
+      echo 'Waiting for database...' &&
+      sleep 5 &&
+      echo 'Contents of /src:' &&
+      ls -la /src &&
+      echo 'Building project...' &&
+      dotnet build &&
+      echo 'Installing EF Core tools...' &&
+      dotnet tool install --global dotnet-ef ||
+      dotnet tool update --global dotnet-ef &&
+      echo 'Running migrations...' &&
+      /root/.dotnet/tools/dotnet-ef database update --verbose
+      "]
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - DB_CONNECTION_STRING=Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123;TrustServerCertificate=True
+      - DB_CONNECTION_STRING=Host=db;Database=SoftwareDirectory;Username=postgres;Password=Your_password123
     depends_on:
       db:
         condition: service_healthy
