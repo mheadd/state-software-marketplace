@@ -13,6 +13,11 @@ RUN dotnet tool install --global dotnet-ef && \
     export PATH="$PATH:/root/.dotnet/tools" && \
     dotnet ef --version
 
+# Install and restore LibMan packages
+RUN dotnet tool install -g Microsoft.Web.LibraryManager.CLI && \
+    export PATH="$PATH:/root/.dotnet/tools" && \
+    libman restore
+
 FROM build AS publish
 RUN dotnet publish "state-software-marketplace.csproj" -c Release -o /app/publish
 

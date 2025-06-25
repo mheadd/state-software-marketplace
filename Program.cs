@@ -1,4 +1,5 @@
 global using Microsoft.EntityFrameworkCore;
+global using state_software_marketplace.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,12 +54,16 @@ catch (Exception ex)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days.
+    app.UseHsts();
 }
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();  // Add this line to serve static files from wwwroot
+
 app.UseRouting();
 
 app.UseAuthorization();
-
-app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
